@@ -1,15 +1,13 @@
 package com.fju;
 
-import javax.sound.sampled.AudioFormat;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Scanner;
 
@@ -17,68 +15,81 @@ public class Tester {
     private static HttpURLConnection connection;
     public static void main(String[] args) {
         Scanner sc= new Scanner(System.in);
-        System.out.println("Welcome to FJU movie rental store.");
-        System.out.println("Enter a key word to find your movie.");
-        //choose movie
-        //movie DVD
-        String dd="Y";
-        while(dd!=null)
-        {
-        try {
-            String keyword=sc.next();
-            String search="https://www.omdbapi.com/?apikey=4c75f77b"+"&s="+keyword;
-            URL url= new URL(search);
+        System.out.println("Welcome to FJU DVD rental store.");
+        System.out.println("Enter a key word to find your movie or series.(like:harry/superman/spider)");
+        while(true) {
+
             try {
-                connection= (HttpURLConnection) url.openConnection();
-                BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF8"));
-                String line= reader.readLine();
-                StringBuffer responseContent= new StringBuffer();
-                while (line!=null){
-                    responseContent.append(line);
-                    line= reader.readLine();
+                String keyword = sc.nextLine();
+                String search = "https://www.omdbapi.com/?apikey=4c75f77b" + "&s=" + keyword;
+                URL url = new URL(search);
+                try {
+                    connection = (HttpURLConnection) url.openConnection();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String line = reader.readLine();
+                    StringBuffer responseContent = new StringBuffer();
+                    while (line != null) {
+                        responseContent.append(line);
+                        line = reader.readLine();
+                    }
+                    reader.close();
+                    parse(responseContent.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                System.out.println(responseContent.toString());
-            } catch (IOException e) {
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Did you find your movie ?");
-        System.out.println("Enter 'Y' to rent movie or enter 'N' to searching again");
-        dd=sc.next();
-        if(dd.equals("Y")){
-            dd=null;
+            System.out.println("Did you find it ?");
+            System.out.println("Enter 'Y' to rent a movie or enter 'N' to search again.");
+            String dd ;
+            dd= sc.nextLine();
+            if (dd.equals("Y")) {
+                break;
+            }
+            if (dd.equals("N")) {
+                System.out.println("Please enter again to find your movie.");
             }
         }
-
-        System.out.println("Please enter how many adults: ");
-        int adults= Integer.parseInt(sc.next());
-        System.out.println("Please enter how many students: ");
-        int students= Integer.parseInt(sc.next());
-        System.out.println("Please enter how many kids or elder: ");
-        int concession= Integer.parseInt(sc.next());
-        TicketAdult ta= new TicketAdult();
-        TicketStudent ts= new TicketStudent();
-        TicketConcession tc= new TicketConcession();
-        if(adults>0){
-            System.out.println(ta.name+" "+ta.price*adults);
+        System.out.println("Insert the DVD name you want to rent.");
+        String dvd;
+        dvd= sc.nextLine();
+        System.out.println("How many days do you want to rent ?");
+        System.out.println("Please insert a number :");
+        Calendar todaycal= Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        int exdate=sc.nextInt();
+        System.out.println("This is your order ! ");
+        System.out.println("DVD name : "+dvd);
+        //cost
+        Cost[] costs={new ShortCost(),new MediumCost(),new LongCost()};
+        for (Cost cost:costs) {
+            if (cost.money(exdate)){
+                System.out.println(cost.name+" "+(cost.price*exdate));
+                break;
+            }else if(exdate>=365){
+                System.out.println("You rent over 1 year !"+"\n"+"Over one year = "+exdate*6);
+                break;
+            }
         }
-        if (students>0){
-            System.out.println(ts.name+" "+ts.price*students);
-        }
-        if (concession>0){
-            System.out.println(tc.name+" "+tc.price*concession);
-        }
-        System.out.println("You have to pay: "+((ta.price*adults)+(ts.price*students)+(tc.price*concession)));
-        if (adults+students+concession<=0){
-            System.out.println("Please insert correct number !");
-        }
-        Calendar cal= Calendar.getInstance();
-        System.out.println(cal.getTime());
+        //day
+        System.out.println("Start From : "+sdf.format(todaycal.getTime()));
+        todaycal.add(Calendar.DAY_OF_MONTH,+exdate);
+        System.out.println("Expiry Date : "+sdf.format(todaycal.getTime()));
 
     }
+    //api parse
     public static String parse(String responseBody){
+        JSONObject albums=new JSONObject(responseBody);
+        JSONArray arr=albums.getJSONArray("Search");
+        for (int i = 0; i < arr.length(); i++) {
+            String title= arr.getJSONObject(i).getString("Title");
+            String year= arr.getJSONObject(i).getString("Year");
+            String type= arr.getJSONObject(i).getString("Type");
+            String poster= arr.getJSONObject(i).getString("Poster");
+            System.out.println(type+" "+title+" "+year+" "+poster);
+        }
+        System.out.println("\n");
         return null;
     }
 
