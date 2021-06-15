@@ -17,8 +17,8 @@ public class Tester {
         Scanner sc= new Scanner(System.in);
         System.out.println("Welcome to FJU DVD rental store.");
         System.out.println("Enter a key word to find your movie or series.(like:harry/superman/spider)");
+        //api connection
         while(true) {
-
             try {
                 String keyword = sc.nextLine();
                 String search = "https://www.omdbapi.com/?apikey=4c75f77b" + "&s=" + keyword;
@@ -56,6 +56,7 @@ public class Tester {
         dvd= sc.nextLine();
         System.out.println("How many days do you want to rent ?");
         System.out.println("Please insert a number :");
+        //Calendar
         Calendar todaycal= Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         int exdate=sc.nextInt();
@@ -72,11 +73,10 @@ public class Tester {
                 break;
             }
         }
-        //day
+        //day count
         System.out.println("Start From : "+sdf.format(todaycal.getTime()));
         todaycal.add(Calendar.DAY_OF_MONTH,+exdate);
         System.out.println("Expiry Date : "+sdf.format(todaycal.getTime()));
-
     }
     //api parse
     public static String parse(String responseBody){
