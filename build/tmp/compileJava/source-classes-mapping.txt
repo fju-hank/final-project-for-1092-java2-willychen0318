@@ -1,2 +1,10 @@
+com/fju/TicketStudent.java
+ com.fju.TicketStudent
+com/fju/TicketConcession.java
+ com.fju.TicketConcession
+com/fju/TicketAdult.java
+ com.fju.TicketAdult
+com/fju/Ticket.java
+ com.fju.Ticket
 com/fju/Tester.java
  com.fju.Tester
